@@ -6,25 +6,18 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-
-import static android.R.attr.data;
-import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    AppCompatButton btn;
-    AppCompatTextView tv;
     private static final int PERMISSION_CALLBACK_CONSTANT = 100;
     private static final int REQUEST_PERMISSION_SETTING = 101;
     public String[] PERMISSIONS = {android.Manifest.permission.CAMERA,
@@ -32,12 +25,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             android.Manifest.permission.READ_EXTERNAL_STORAGE};
+    AppCompatButton btn;
+    CaptureSerialActivityPresenter captureSerialActivityPresenter;
+    AppCompatTextView tv;
+    boolean perStatus;
+    SharedPreferences permissionStatus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btn = findViewById(R.id.btn);
         btn.setOnClickListener(this);
+        captureSerialActivityPresenter = new CaptureSerialActivityPresenter(this);
         tv = findViewById(R.id.value);
 
     }
@@ -49,11 +49,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(intent, 1);
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
 
             String result = data.getStringExtra("result");
+            captureSerialActivityPresenter.postCheckSerial("1", result, "1");
             tv.setText(result);
 
         }
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-    boolean perStatus;
+
     public boolean hasPermissions(final String... permissions) {
         perStatus = false;
         permissionStatus = this.getSharedPreferences("permissionStatus", MODE_PRIVATE);
@@ -152,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return perStatus;
     }
-    SharedPreferences permissionStatus;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

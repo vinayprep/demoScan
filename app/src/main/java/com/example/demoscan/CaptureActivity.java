@@ -15,6 +15,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -27,21 +28,21 @@ import me.dm7.barcodescanner.core.ViewFinderView;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class CaptureActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
-    private ZXingScannerView mScannerView;
     CameraSource cameraSource;
+    private ZXingScannerView mScannerView;
 
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_capture);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar ab = getSupportActionBar();
         if (ab != null) {
             ab.setDisplayHomeAsUpEnabled(true);
         }
 
-        ViewGroup contentFrame = (ViewGroup) findViewById(R.id.content_frame);
+        ViewGroup contentFrame = findViewById(R.id.content_frame);
         mScannerView = new ZXingScannerView(this) {
             @Override
             protected IViewFinder createViewFinderView(Context context) {
@@ -61,23 +62,20 @@ public class CaptureActivity extends AppCompatActivity implements ZXingScannerVi
     private void initialiseDetectorsAndSources() {
 //        Bitmap bitmap = ((BitmapDrawable)getResources().getDrawable(R.drawable.ic_notfound)).getBitmap();
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(CaptureActivity.this)
-                .setBarcodeFormats(Barcode.QR_CODE)
-                .setBarcodeFormats(Barcode.DATA_MATRIX)
-                .setBarcodeFormats(Barcode.AZTEC)
-                .setBarcodeFormats(Barcode.PDF417)
+                .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
 
         cameraSource = new CameraSource.Builder(this, barcodeDetector)
-                .setRequestedPreviewSize(1920, 1080)
+                .setRequestedPreviewSize(190, 108)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedFps(15.0f)
+                .setRequestedFps(1.0f)
                 .setAutoFocusEnabled(true) //you should add this feature
                 .build();
 
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
-//                Toast.makeText(BarCodeScanActivity.this, "To prevent memory leaks barcode scanner has been stopped", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CaptureActivity.this, "To prevent memory leaks barcode scanner has been stopped", Toast.LENGTH_SHORT).show();
             }
 
             @Override
